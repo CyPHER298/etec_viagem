@@ -2,6 +2,7 @@ package br.com.etechoracio.etec_viagem.controller;
 
 import br.com.etechoracio.etec_viagem.entity.Viagem;
 import br.com.etechoracio.etec_viagem.repository.ViagemRepository;
+import br.com.etechoracio.etec_viagem.service.ViagemService;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,50 +25,40 @@ import java.util.Optional;
 public class ViagemController {
 	
 	@Autowired
-	private ViagemRepository repository;
-	List<Viagem> viagem = new ArrayList<Viagem>();
+	private ViagemService service;
 	
 	@GetMapping
-	public ResponseEntity<List<Viagem>> getAll(){
-		viagem = repository.findAll();
-		return ResponseEntity.ok(viagem);
+	public List<Viagem> listarTodos(){
+		return service.listarTodos();
 	}
 	
 	@GetMapping("/{id}")
-	
-	public ResponseEntity<Viagem>getById(@PathVariable Integer id){
-		Optional<Viagem> viagemOptional = repository.findById(id);
-		if(viagemOptional.isPresent()) {
-			ResponseEntity.noContent().build();
+	public ResponseEntity<Viagem> buscarPorId(@PathVariable Long id){
+		Optional<Viagem> existe = service.buscarPorId(id);
+		return existe.isPresent() ? ResponseEntity.ok(existe.get())
+								  : ResponseEntity.notFound().build();
 		}
-		return ResponseEntity.ok(viagemOptional.get());
 		
-	}
 	
-	@PostMapping("/{id}")
-	public ResponseEntity<Viagem> insert(@RequestBody Viagem viagem){
-		repository.save(viagem);
-		return ResponseEntity.status(HttpStatus.CREATED).body(viagem);
+	@PostMapping
+	public ResponseEntity<Viagem> insert(@RequestBody Viagem obj){
+		service.inserir(obj);
+		return ResponseEntity.ok(obj);
 	}
 
 	@PutMapping("/{id}")
-	public ResponseEntity<Viagem> update(@PathVariable Integer id, @RequestBody Viagem viagem){
+	public ResponseEntity<Viagem> atualizar(@PathVariable Long id, @RequestBody Viagem viagem){
 		
-		boolean existe = repository.existsById(id);
-		if (existe) {
-			repository.save(viagem);
-			return ResponseEntity.status(HttpStatus.CREATED).body(viagem);
+		Optional<Viagem> existe = service.atualizar(id,viagem);
+		if (!existe.isPresent()) {
+			return ResponseEntity.notFound().build();
 		}
 		return ResponseEntity.noContent().build();	
 	}
-	@DeleteMapping("/{id}")
-	public ResponseEntity<Viagem> delete(@PathVariable Integer id){
-		repository.deleteById(id);
-		return ResponseEntity.noContent().build();
-		
-	}
-	
+
 }
+	
+
 
 
 

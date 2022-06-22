@@ -1,7 +1,9 @@
 package br.com.etechoracio.etec_viagem.controller;
 
 import br.com.etechoracio.etec_viagem.entity.Gasto;
+import br.com.etechoracio.etec_viagem.entity.Viagem;
 import br.com.etechoracio.etec_viagem.repository.GastoRepository;
+import br.com.etechoracio.etec_viagem.service.GastoService;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,47 +26,36 @@ import java.util.Optional;
 public class GastoController {
 	
 	@Autowired
-	private GastoRepository repository;
-	List<Gasto> gasto = new ArrayList<Gasto>();
+	private GastoService service;
+
 	
 	@GetMapping
-	public ResponseEntity<List<Gasto>> getAll(){
-		gasto = repository.findAll();
-		return ResponseEntity.ok(gasto);
+	public List<Gasto> listarTodos(){
+		return service.listarTodos();
 	}
 	
 	@GetMapping("/{id}")
-	
-	public ResponseEntity<Gasto>getById(@PathVariable Integer id){
-		Optional<Gasto> gastoOptional = repository.findById(id);
-		if(gastoOptional.isPresent()) {
-			ResponseEntity.noContent().build();
+	public ResponseEntity<Gasto> buscarPorId(@PathVariable Long id){
+		Optional<Gasto> existe = service.buscarPorId(id);
+		return existe.isPresent() ? ResponseEntity.ok(existe.get())
+								  : ResponseEntity.notFound().build();
 		}
-		return ResponseEntity.ok(gastoOptional.get());
-		
-	}
 	
-	@PostMapping("/{id}")
-	public ResponseEntity<Gasto> insert(@RequestBody Gasto gasto){
-		repository.save(gasto);
-		return ResponseEntity.status(HttpStatus.CREATED).body(gasto);
+	@PostMapping
+	public ResponseEntity<Gasto> insert(@RequestBody Gasto obj){
+		service.inserir(obj);
+		return ResponseEntity.ok(obj);
 	}
 
 	@PutMapping("/{id}")
-	public ResponseEntity<Gasto> update(@PathVariable Integer id, @RequestBody Gasto gasto){
+	public ResponseEntity<Gasto> atualizar(@PathVariable Long id, @RequestBody Gasto gasto){
 		
-		boolean existe = repository.existsById(id);
-		if (existe) {
-			repository.save(gasto);
-			return ResponseEntity.status(HttpStatus.CREATED).body(gasto);
+		Optional<Gasto> existe = service.atualizar(id,gasto);
+		if (!existe.isPresent()) {
+			return ResponseEntity.notFound().build();
 		}
 		return ResponseEntity.noContent().build();	
 	}
-	@DeleteMapping("/{id}")
-	public ResponseEntity<Gasto> delete(@PathVariable Integer id){
-		repository.deleteById(id);
-		return ResponseEntity.noContent().build();
-		
-	}
+
 	
 }

@@ -1,5 +1,6 @@
 package br.com.etechoracio.etec_viagem.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -17,6 +18,8 @@ public interface ViagemRepository extends JpaRepository<Viagem, Long> {
 	void deleteById(Integer id);
 
 	Optional<Viagem> findById(Integer id);
+
+	List<Viagem> findByGastoId(Long id);
 
 	
 }
